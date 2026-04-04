@@ -1,0 +1,157 @@
+Python Based Finance System Backend
+Objective
+To evaluate your Python development skills through a practical assignment focused on application design, API development, data handling, and business logic.
+
+This assignment is meant to assess how you think as a developer when working with Python in a real world setting. We want to understand how you structure code, design systems, handle data correctly, and build a backend that is clean, reliable, and easy to understand.
+
+You may use Flask, FastAPI, or Django, depending on your comfort and preference.
+
+Note: If you have already built a similar Python project earlier, you may submit that project for evaluation. Please clearly explain how it fits this assignment and include the repository link and, if available, the deployed project or API documentation link.
+Key Instructions
+You are not required to follow a fixed project structure. You are free to organize the project in the way you believe is most logical and maintainable.
+Focus on clean Python code and clear backend thinking. We are interested in your approach to code structure, business logic, API handling, validation, and maintainability.
+Reasonable assumptions are acceptable. If some details are not explicitly defined, you may make sensible assumptions and mention them in your documentation.
+A simple and well built solution is better than an overly complex one. We value clarity, correctness, and code quality more than unnecessary feature overload.
+Flexibility
+You have full freedom to:
+
+Use Flask, FastAPI, or Django
+Use any database of your choice, such as SQLite, PostgreSQL, MySQL, or a simple local database
+Build REST APIs or a small web application with backend rendered pages
+Structure the application in your preferred way
+Use mock data or seed data where needed
+Add authentication or keep it simplified, depending on your design
+Scenario
+Imagine you are building a Python powered finance tracking system for users who want to manage and analyze their financial records.
+
+The system should allow storage and management of transactions, summaries of financial activity, and basic role based behavior for different types of users. The aim is to build a backend that is logically organized, functionally correct, and suitable for powering a dashboard or finance application.
+
+Core Requirements
+1. Financial Records Management
+Create a backend that supports storing and managing financial entries such as income and expenses.
+
+Each record may include fields such as:
+
+Amount
+Type such as income or expense
+Category
+Date
+Notes or description
+Your application should provide a way to:
+
+Create records
+View records
+Update records
+Delete records
+Filter records using criteria such as date, category, or type
+The exact data model is up to you, but it should be sensible and clearly structured.
+
+2. Summary and Analytics Logic
+Provide backend support for generating useful financial summaries.
+
+Examples may include:
+
+Total income
+Total expenses
+Current balance
+Category wise breakdown
+Monthly totals
+Recent activity
+The purpose here is to evaluate how you process and return meaningful data, not just how you perform CRUD operations.
+
+3. User and Role Handling
+Include basic user handling in your system.
+
+You may define roles such as:
+
+Viewer: Can view financial records and summaries
+Analyst: Can view records, apply filters, and access detailed insights
+Admin: Can create, update, delete, and manage records or users
+You do not need to build a highly advanced authentication system unless you want to, but role based behavior should be clear in your application design.
+
+4. API or Backend Interface
+Your project should expose a usable backend interface.
+
+This may be in the form of:
+
+REST API endpoints
+Django views
+FastAPI routes
+Flask routes
+A combination of API and simple frontend templates
+The interface should be structured in a way that makes the system easy to test and understand.
+
+5. Validation and Error Handling
+Your project should demonstrate proper backend behavior when handling invalid or incomplete input.
+
+This includes:
+
+Input validation
+Useful error responses
+Clear handling of invalid operations
+Appropriate status codes if you build APIs
+We want to see that your application behaves predictably and safely when something goes wrong.
+
+6. Database or Persistence Layer
+Use a persistence method suitable for your solution.
+
+You may use:
+
+SQLite for simplicity
+PostgreSQL or MySQL for a more complete setup
+Django ORM, SQLAlchemy, or any equivalent tool
+A simplified storage approach if clearly documented
+Your data handling should be logically designed, even if the project itself remains small.
+
+7. Python Code Quality
+Your code should reflect good Python development practices.
+
+We will look for things such as:
+
+Clear function and class structure
+Readable naming
+Separation of concerns
+Reusable logic
+Logical file organization
+Clean handling of configuration and dependencies
+Optional Enhancements
+You may include additional features such as:
+
+Authentication using sessions or tokens
+Pagination for record listing
+Search functionality
+Unit tests
+API documentation
+Admin panel
+Import or export of records in CSV or JSON format
+These are not mandatory, but thoughtful additions are always appreciated.
+
+Evaluation Criteria
+1. Python Proficiency
+How effectively Python is used to build a clean, structured, and maintainable solution.
+
+2. Application Design
+How well the project is organized in terms of routes, views, services, models, and overall flow.
+
+3. Functionality
+Whether the expected features work correctly and consistently.
+
+4. Logical Thinking
+How clearly the business rules, summaries, and access behavior have been implemented.
+
+5. Data Handling
+How well records, filters, summaries, and persistence are designed and managed.
+
+6. Validation and Reliability
+How the application handles invalid data, errors, and edge cases.
+
+7. Code Quality
+Readability, maintainability, consistency, and overall engineering discipline.
+
+8. Documentation
+Clarity of the README, setup instructions, explanation of the project, assumptions made, and how to test the system.
+
+Important Note
+This assignment is intended purely for assessment. The goal is to understand your Python development approach, your backend thinking, and how you structure solutions in a practical setting. You are not expected to build a production ready system.
+
+A smaller project with strong fundamentals, clean structure, and correct logic will always be valued more than unnecessary complexity.

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker - Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Finance Tracker</h1>
+            <nav>
+                <a href="/">Dashboard</a>
+                <a href="/transactions.html">Transactions</a>
+                <a href="/upload.html">Upload</a>
+                <button id="logout-btn">Logout</button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Income</div>
+                <div class="stat-value positive" id="total-income">$0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Expenses</div>
+                <div class="stat-value negative" id="total-expenses">$0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Net Balance</div>
+                <div class="stat-value" id="net-balance">$0.00</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="card chart-card">
+                <h3>Spending by Category</h3>
+                <canvas id="category-chart"></canvas>
+            </div>
+            <div class="card chart-card">
+                <h3>Top 5 Expenses</h3>
+                <div id="top-expenses"></div>
+            </div>
+            <div class="card chart-card">
+                <h3>Income vs Expenses</h3>
+                <canvas id="monthly-chart"></canvas>
+            </div>
+            <div class="card chart-card">
+                <h3>Recent Activity</h3>
+                <div id="recent-activity"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
