@@ -11,6 +11,30 @@ from app.services.csv_parser import parse_transactions_from_statement
 
 upload_bp = Blueprint('upload', __name__, url_prefix='/upload')
 
+ALLOWED_IMAGE_TYPES = {'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
+def validate_image_file(file):
+    """Validate that the uploaded file is an image and within size limits."""
+    if file.filename == '':
+        return 'No file selected'
+    
+    # Check file type
+    if file.content_type not in ALLOWED_IMAGE_TYPES:
+        return f'Invalid file type: {file.content_type}. Please upload an image file (JPEG, PNG, GIF, or WebP).'
+    
+    # Check file size (read and seek back)
+    file.seek(0, 2)  # Seek to end
+    size = file.tell()
+    file.seek(0)  # Seek back to start
+    if size > MAX_FILE_SIZE:
+        return f'File is too large ({size // (1024*1024)}MB). Maximum file size is 10MB.'
+    
+    if size == 0:
+        return 'File is empty. Please upload a valid image.'
+    
+    return None
+
 @upload_bp.route('/receipt', methods=['POST'])
 @require_role('admin')
 def upload_receipt():
@@ -18,8 +42,10 @@ def upload_receipt():
         return jsonify({'success': False, 'error': 'No file provided'}), 400
     
     file = request.files['file']
-    if file.filename == '':
-        return jsonify({'success': False, 'error': 'No file selected'}), 400
+    
+    error = validate_image_file(file)
+    if error:
+        return jsonify({'success': False, 'error': error}), 400
     
     try:
         image_data = base64.b64encode(file.read()).decode('utf-8')
@@ -49,8 +75,10 @@ def upload_bank_statement():
         return jsonify({'success': False, 'error': 'No file provided'}), 400
     
     file = request.files['file']
-    if file.filename == '':
-        return jsonify({'success': False, 'error': 'No file selected'}), 400
+    
+    error = validate_image_file(file)
+    if error:
+        return jsonify({'success': False, 'error': error}), 400
     
     try:
         image_data = base64.b64encode(file.read()).decode('utf-8')

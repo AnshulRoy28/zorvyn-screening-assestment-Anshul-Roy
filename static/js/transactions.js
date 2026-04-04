@@ -75,15 +75,15 @@ async function loadTransactions() {
 
         const tbody = document.querySelector('#transactions-table tbody');
         tbody.innerHTML = transactions.map(t => `
-            <tr>
-                <td>${t.date}</td>
-                <td>${t.item_name}</td>
-                <td>${t.category}</td>
-                <td>$${t.amount.toFixed(2)}</td>
-                <td>${t.type}</td>
-                <td>${t.source}</td>
-                <td>
-                    <button class="btn btn-danger" onclick="deleteTransaction(${t.id})">Delete</button>
+            <tr class="hover:bg-gray-50/50 transition-colors">
+                <td class="px-6 py-4 text-gray-500">${t.date}</td>
+                <td class="px-6 py-4 font-medium text-gray-900">${t.item_name}</td>
+                <td class="px-6 py-4"><span class="text-[10px] px-2 py-1 rounded-md bg-gray-100 text-gray-600">${t.category}</span></td>
+                <td class="px-6 py-4 text-right font-medium ${t.type === 'income' ? 'text-green-600' : 'text-gray-900'}">${t.type === 'income' ? '+' : '-'}$${t.amount.toFixed(2)}</td>
+                <td class="px-6 py-4"><span class="text-[10px] px-2 py-1 rounded-md ${t.type === 'income' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}">${t.type}</span></td>
+                <td class="px-6 py-4 text-gray-500">${t.source}</td>
+                <td class="px-6 py-4">
+                    <button onclick="deleteTransaction(${t.id})" class="text-xs text-red-500 hover:text-red-700 font-medium transition-colors">Delete</button>
                 </td>
             </tr>
         `).join('');

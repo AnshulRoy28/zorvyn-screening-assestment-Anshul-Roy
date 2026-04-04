@@ -3,8 +3,8 @@ from sqlalchemy import func, extract
 from app.models import Transaction
 from app.database import db
 
-def get_summary(filters=None):
-    query = Transaction.query
+def get_summary(user_id, filters=None):
+    query = Transaction.query.filter_by(user_id=user_id)
     
     if filters and filters.get('month'):
         try:
@@ -30,8 +30,8 @@ def get_summary(filters=None):
         'net_balance': float(income - expenses)
     }
 
-def get_summary_by_category(filters=None):
-    query = Transaction.query.filter(Transaction.type == 'expense')
+def get_summary_by_category(user_id, filters=None):
+    query = Transaction.query.filter_by(user_id=user_id).filter(Transaction.type == 'expense')
     
     if filters and filters.get('month'):
         try:
@@ -64,8 +64,8 @@ def get_summary_by_category(filters=None):
     
     return [{'category': r.category, 'total': float(r.total)} for r in results]
 
-def get_summary_by_month():
-    results = Transaction.query.with_entities(
+def get_summary_by_month(user_id):
+    results = Transaction.query.filter_by(user_id=user_id).with_entities(
         extract('year', Transaction.date).label('year'),
         extract('month', Transaction.date).label('month'),
         Transaction.type,
@@ -85,8 +85,8 @@ def get_summary_by_month():
     
     return list(monthly_data.values())
 
-def get_recent_transactions(limit=10):
-    transactions = Transaction.query.order_by(
+def get_recent_transactions(user_id, limit=10):
+    transactions = Transaction.query.filter_by(user_id=user_id).order_by(
         Transaction.date.desc(),
         Transaction.created_at.desc()
     ).limit(limit).all()

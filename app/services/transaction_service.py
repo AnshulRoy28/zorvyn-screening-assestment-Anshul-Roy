@@ -58,8 +58,8 @@ def create_transaction(user_id, data):
     
     return transaction, None
 
-def update_transaction(transaction_id, data):
-    transaction = Transaction.query.get(transaction_id)
+def update_transaction(transaction_id, user_id, data):
+    transaction = Transaction.query.filter_by(id=transaction_id, user_id=user_id).first()
     if not transaction:
         return None, ['Transaction not found']
     
@@ -96,8 +96,8 @@ def update_transaction(transaction_id, data):
     db.session.commit()
     return transaction, None
 
-def delete_transaction(transaction_id):
-    transaction = Transaction.query.get(transaction_id)
+def delete_transaction(transaction_id, user_id):
+    transaction = Transaction.query.filter_by(id=transaction_id, user_id=user_id).first()
     if not transaction:
         return False, 'Transaction not found'
     
@@ -105,8 +105,8 @@ def delete_transaction(transaction_id):
     db.session.commit()
     return True, None
 
-def get_filtered_transactions(filters):
-    query = Transaction.query
+def get_filtered_transactions(user_id, filters):
+    query = Transaction.query.filter_by(user_id=user_id)
     
     if filters.get('month'):
         try:

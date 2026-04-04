@@ -47,7 +47,16 @@ def extract_from_receipt(image_data):
         text = text.strip()
         
         transactions = json.loads(text)
-        return transactions, None
+        
+        # Validate: must be a non-empty list of dicts with at least item_name or amount
+        if not isinstance(transactions, list) or len(transactions) == 0:
+            return None, 'No financial data could be extracted from this image. Please upload a clear receipt photo.'
+        
+        valid = [t for t in transactions if isinstance(t, dict) and (t.get('item_name') or t.get('amount'))]
+        if not valid:
+            return None, 'The image does not appear to contain receipt or transaction data. Please upload a receipt or bank statement.'
+        
+        return valid, None
     
     except json.JSONDecodeError as e:
         return None, f'Failed to parse Gemini response: {str(e)}'
@@ -96,7 +105,15 @@ def extract_from_bank_statement(image_data):
         text = text.strip()
         
         transactions = json.loads(text)
-        return transactions, None
+        
+        if not isinstance(transactions, list) or len(transactions) == 0:
+            return None, 'No financial data could be extracted from this image. Please upload a clear bank statement screenshot.'
+        
+        valid = [t for t in transactions if isinstance(t, dict) and (t.get('item_name') or t.get('amount'))]
+        if not valid:
+            return None, 'The image does not appear to contain bank statement data. Please upload a bank statement screenshot.'
+        
+        return valid, None
     
     except json.JSONDecodeError as e:
         return None, f'Failed to parse Gemini response: {str(e)}'

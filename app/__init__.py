@@ -38,6 +38,10 @@ def create_app():
     def login():
         return render_template('login.html')
     
+    @app.route('/signup.html')
+    def signup():
+        return render_template('signup.html')
+    
     @app.route('/upload.html')
     def upload():
         return render_template('upload.html')
@@ -45,5 +49,9 @@ def create_app():
     @app.route('/transactions.html')
     def transactions():
         return render_template('transactions.html')
+    
+    @app.route('/recurring.html')
+    def recurring():
+        return render_template('recurring.html')
     
     return app

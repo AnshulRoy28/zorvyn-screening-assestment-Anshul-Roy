@@ -21,7 +21,7 @@ def get_transactions():
         'end_date': request.args.get('end_date')
     }
     
-    transactions = get_filtered_transactions(filters)
+    transactions = get_filtered_transactions(request.user_id, filters)
     return jsonify({
         'success': True,
         'data': [t.to_dict() for t in transactions]
@@ -30,7 +30,7 @@ def get_transactions():
 @transactions_bp.route('/<int:id>', methods=['GET'])
 @require_auth
 def get_transaction(id):
-    transaction = Transaction.query.get(id)
+    transaction = Transaction.query.filter_by(id=id, user_id=request.user_id).first()
     if not transaction:
         return jsonify({'success': False, 'error': 'Transaction not found'}), 404
     
@@ -81,7 +81,7 @@ def update_transaction_route(id):
     if not data:
         return jsonify({'success': False, 'error': 'No data provided'}), 400
     
-    transaction, errors = update_transaction(id, data)
+    transaction, errors = update_transaction(id, request.user_id, data)
     if errors:
         return jsonify({'success': False, 'error': ', '.join(errors)}), 400
     
@@ -90,7 +90,7 @@ def update_transaction_route(id):
 @transactions_bp.route('/<int:id>', methods=['DELETE'])
 @require_role('admin')
 def delete_transaction_route(id):
-    success, error = delete_transaction(id)
+    success, error = delete_transaction(id, request.user_id)
     if not success:
         return jsonify({'success': False, 'error': error}), 404
     
@@ -121,7 +121,7 @@ def export_csv():
         'end_date': request.args.get('end_date')
     }
     
-    transactions = get_filtered_transactions(filters)
+    transactions = get_filtered_transactions(request.user_id, filters)
     
     output = StringIO()
     writer = csv.writer(output)
@@ -158,7 +158,7 @@ def export_json():
         'end_date': request.args.get('end_date')
     }
     
-    transactions = get_filtered_transactions(filters)
+    transactions = get_filtered_transactions(request.user_id, filters)
     
     import json
     data = json.dumps([t.to_dict() for t in transactions], indent=2)
