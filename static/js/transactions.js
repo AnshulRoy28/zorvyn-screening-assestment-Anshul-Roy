@@ -35,12 +35,13 @@ async function fetchWithAuth(url, options = {}) {
 
 async function loadTransactions() {
     const params = new URLSearchParams();
-    
+
     const category = document.getElementById('filter-category').value;
     const type = document.getElementById('filter-type').value;
     const startDate = document.getElementById('filter-start').value;
     const endDate = document.getElementById('filter-end').value;
-    
+    const sortBy = document.getElementById('sort-by').value;
+
     if (category) params.append('category', category);
     if (type) params.append('type', type);
     if (startDate) params.append('start_date', startDate);
@@ -50,8 +51,30 @@ async function loadTransactions() {
     const result = await response.json();
 
     if (result.success) {
+        let transactions = result.data;
+
+        // Client-side sorting
+        const [sortField, sortOrder] = sortBy.split('-');
+        transactions.sort((a, b) => {
+            let compareA, compareB;
+
+            if (sortField === 'date') {
+                compareA = new Date(a.date);
+                compareB = new Date(b.date);
+            } else if (sortField === 'amount') {
+                compareA = a.amount;
+                compareB = b.amount;
+            }
+
+            if (sortOrder === 'asc') {
+                return compareA > compareB ? 1 : -1;
+            } else {
+                return compareA < compareB ? 1 : -1;
+            }
+        });
+
         const tbody = document.querySelector('#transactions-table tbody');
-        tbody.innerHTML = result.data.map(t => `
+        tbody.innerHTML = transactions.map(t => `
             <tr>
                 <td>${t.date}</td>
                 <td>${t.item_name}</td>
@@ -84,43 +107,81 @@ async function deleteTransaction(id) {
 
 function exportToCSV() {
     const params = new URLSearchParams();
-    
+
     const category = document.getElementById('filter-category').value;
     const type = document.getElementById('filter-type').value;
     const startDate = document.getElementById('filter-start').value;
     const endDate = document.getElementById('filter-end').value;
-    
+
     if (category) params.append('category', category);
     if (type) params.append('type', type);
     if (startDate) params.append('start_date', startDate);
     if (endDate) params.append('end_date', endDate);
 
     const token = getToken();
-    
+
     // Create a temporary link to download
     fetch(`${API_URL}/transactions/export/csv?${params}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
     })
-    .then(response => response.blob())
-    .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'transactions.csv';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+        .then(response => response.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'transactions.csv';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        })
+        .catch(error => {
+            alert('Export failed: ' + error.message);
+        });
+}
+
+function exportToJSON() {
+    const params = new URLSearchParams();
+
+    const category = document.getElementById('filter-category').value;
+    const type = document.getElementById('filter-type').value;
+    const startDate = document.getElementById('filter-start').value;
+    const endDate = document.getElementById('filter-end').value;
+
+    if (category) params.append('category', category);
+    if (type) params.append('type', type);
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+
+    const token = getToken();
+
+    fetch(`${API_URL}/transactions/export/json?${params}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
     })
-    .catch(error => {
-        alert('Export failed: ' + error.message);
-    });
+        .then(response => response.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'transactions.json';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        })
+        .catch(error => {
+            alert('Export failed: ' + error.message);
+        });
 }
 
 document.getElementById('apply-filters').addEventListener('click', loadTransactions);
+document.getElementById('sort-by').addEventListener('change', loadTransactions);
 document.getElementById('export-csv-btn').addEventListener('click', exportToCSV);
+document.getElementById('export-json-btn').addEventListener('click', exportToJSON);
 document.getElementById('logout-btn').addEventListener('click', logout);
 
 loadTransactions();

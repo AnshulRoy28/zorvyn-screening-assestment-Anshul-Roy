@@ -146,3 +146,25 @@ def export_csv():
         mimetype='text/csv',
         headers={'Content-Disposition': 'attachment; filename=transactions.csv'}
     )
+
+@transactions_bp.route('/export/json', methods=['GET'])
+@require_auth
+def export_json():
+    filters = {
+        'month': request.args.get('month'),
+        'category': request.args.get('category'),
+        'type': request.args.get('type'),
+        'start_date': request.args.get('start_date'),
+        'end_date': request.args.get('end_date')
+    }
+    
+    transactions = get_filtered_transactions(filters)
+    
+    import json
+    data = json.dumps([t.to_dict() for t in transactions], indent=2)
+    
+    return Response(
+        data,
+        mimetype='application/json',
+        headers={'Content-Disposition': 'attachment; filename=transactions.json'}
+    )

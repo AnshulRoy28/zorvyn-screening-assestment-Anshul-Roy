@@ -46,6 +46,15 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>Sort By</label>
+                    <select id="sort-by">
+                        <option value="date-desc">Date (Newest)</option>
+                        <option value="date-asc">Date (Oldest)</option>
+                        <option value="amount-desc">Amount (High to Low)</option>
+                        <option value="amount-asc">Amount (Low to High)</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Start Date</label>
                     <input type="date" id="filter-start">
                 </div>
@@ -60,7 +69,10 @@
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h2>All Transactions</h2>
-                <button id="export-csv-btn" class="btn btn-primary">Export to CSV</button>
+                <div style="display: flex; gap: 10px;">
+                    <button id="export-csv-btn" class="btn btn-primary">Export CSV</button>
+                    <button id="export-json-btn" class="btn btn-primary">Export JSON</button>
+                </div>
             </div>
             <table id="transactions-table">
                 <thead>
