@@ -38,10 +38,17 @@ body {
 .editable-cell {
     cursor: pointer;
     transition: background-color 0.15s ease;
+    position: relative;
 }
 
 .editable-cell:hover {
     background-color: rgba(249, 115, 22, 0.05);
+}
+
+.editable-cell input,
+.editable-cell select {
+    min-width: 100%;
+    box-sizing: border-box;
 }
 
 /* Small button for delete actions */
@@ -49,4 +56,14 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Ensure table cells don't collapse */
+#preview-table td {
+    white-space: nowrap;
+}
+
+#preview-table td input,
+#preview-table td select {
+    white-space: normal;
 }

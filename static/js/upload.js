@@ -61,10 +61,13 @@ function makeEditable(cell, rowIndex, field) {
     const currentValue = previewData[rowIndex][field];
     const originalText = cell.textContent;
 
+    // Store original cell styling
+    const cellPadding = cell.className;
+
     if (field === 'category') {
         const categories = ['Food', 'Transport', 'Shopping', 'Bills', 'Entertainment', 'Health', 'Income', 'Other'];
         const select = document.createElement('select');
-        select.className = 'w-full bg-white border border-orange-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500';
+        select.className = 'w-full min-w-[100px] bg-white border border-orange-400 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500';
         categories.forEach(cat => {
             const option = document.createElement('option');
             option.value = cat;
@@ -73,13 +76,14 @@ function makeEditable(cell, rowIndex, field) {
             select.appendChild(option);
         });
         cell.innerHTML = '';
+        cell.style.padding = '0.5rem';
         cell.appendChild(select);
         select.focus();
         select.addEventListener('blur', () => saveEdit(cell, rowIndex, field, select.value, originalText));
         select.addEventListener('change', () => saveEdit(cell, rowIndex, field, select.value, originalText));
     } else if (field === 'type') {
         const select = document.createElement('select');
-        select.className = 'w-full bg-white border border-orange-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500';
+        select.className = 'w-full min-w-[90px] bg-white border border-orange-400 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500';
         ['expense', 'income'].forEach(type => {
             const option = document.createElement('option');
             option.value = type;
@@ -88,6 +92,7 @@ function makeEditable(cell, rowIndex, field) {
             select.appendChild(option);
         });
         cell.innerHTML = '';
+        cell.style.padding = '0.5rem';
         cell.appendChild(select);
         select.focus();
         select.addEventListener('blur', () => saveEdit(cell, rowIndex, field, select.value, originalText));
@@ -97,8 +102,9 @@ function makeEditable(cell, rowIndex, field) {
         input.type = 'number';
         input.step = '0.01';
         input.value = currentValue || '';
-        input.className = 'w-full bg-white border border-orange-400 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-orange-500';
+        input.className = 'w-full min-w-[90px] bg-white border border-orange-400 rounded px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-orange-500';
         cell.innerHTML = '';
+        cell.style.padding = '0.5rem';
         cell.appendChild(input);
         input.focus();
         input.select();
@@ -112,8 +118,9 @@ function makeEditable(cell, rowIndex, field) {
         const input = document.createElement('input');
         input.type = 'date';
         input.value = currentValue || '';
-        input.className = 'w-full bg-white border border-orange-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500';
+        input.className = 'w-full min-w-[110px] bg-white border border-orange-400 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500';
         cell.innerHTML = '';
+        cell.style.padding = '0.5rem';
         cell.appendChild(input);
         input.focus();
         input.addEventListener('blur', () => saveEdit(cell, rowIndex, field, input.value, originalText));
@@ -122,8 +129,9 @@ function makeEditable(cell, rowIndex, field) {
         const input = document.createElement('input');
         input.type = 'text';
         input.value = currentValue || '';
-        input.className = 'w-full bg-white border border-orange-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500';
+        input.className = 'w-full min-w-[150px] bg-white border border-orange-400 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500';
         cell.innerHTML = '';
+        cell.style.padding = '0.5rem';
         cell.appendChild(input);
         input.focus();
         input.select();
@@ -155,12 +163,22 @@ function renderPreviewTable() {
     const tbody = document.querySelector('#preview-table tbody');
     tbody.innerHTML = previewData.map((t, i) => `
         <tr class="hover:bg-gray-50/50 transition-colors">
-            <td class="px-6 py-3 text-gray-900 font-medium editable-cell" data-row="${i}" data-field="item_name">${t.item_name || ''}</td>
-            <td class="px-6 py-3 text-right font-medium text-gray-900 editable-cell" data-row="${i}" data-field="amount">${t.amount ? '$' + t.amount.toFixed(2) : 'N/A'}</td>
-            <td class="px-6 py-3 editable-cell" data-row="${i}" data-field="category"><span class="text-[10px] px-2 py-1 rounded-md bg-gray-100 text-gray-600">${t.category || 'Other'}</span></td>
-            <td class="px-6 py-3 editable-cell" data-row="${i}" data-field="type"><span class="text-[10px] px-2 py-1 rounded-md ${(t.type || 'expense') === 'income' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}">${t.type || 'expense'}</span></td>
-            <td class="px-6 py-3 text-gray-500 editable-cell" data-row="${i}" data-field="date">${t.date || 'Today'}</td>
-            <td class="px-6 py-3 text-center">
+            <td class="px-4 py-3 text-gray-900 font-medium editable-cell" data-row="${i}" data-field="item_name">
+                <div class="truncate max-w-[200px]" title="${t.item_name || ''}">${t.item_name || ''}</div>
+            </td>
+            <td class="px-4 py-3 text-right font-medium text-gray-900 editable-cell" data-row="${i}" data-field="amount">
+                ${t.amount ? '$' + t.amount.toFixed(2) : 'N/A'}
+            </td>
+            <td class="px-4 py-3 editable-cell" data-row="${i}" data-field="category">
+                <span class="text-[10px] px-2 py-1 rounded-md bg-gray-100 text-gray-600 whitespace-nowrap">${t.category || 'Other'}</span>
+            </td>
+            <td class="px-4 py-3 editable-cell" data-row="${i}" data-field="type">
+                <span class="text-[10px] px-2 py-1 rounded-md whitespace-nowrap ${(t.type || 'expense') === 'income' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}">${t.type || 'expense'}</span>
+            </td>
+            <td class="px-4 py-3 text-gray-500 editable-cell whitespace-nowrap" data-row="${i}" data-field="date">
+                ${t.date || 'Today'}
+            </td>
+            <td class="px-4 py-3 text-center">
                 <button class="btn-small text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-colors" onclick="deletePreviewRow(${i})">
                     <iconify-icon icon="solar:trash-bin-trash-linear" width="18"></iconify-icon>
                 </button>
