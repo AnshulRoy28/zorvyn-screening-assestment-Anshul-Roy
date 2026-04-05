@@ -69,8 +69,15 @@ const WIDGETS = [
         title: 'Spending by Category',
         icon: '🍩',
         size: 'half',
-        renderHTML: () => `<canvas id="category-chart-canvas"></canvas>`,
-        load: loadCategoryChart
+        renderHTML: () => `
+            <div class="flex gap-1 mb-4" id="category-period-btns">
+                <button data-period="7" class="px-3 py-1 text-[11px] rounded-lg bg-gray-100 text-gray-500 hover:bg-orange-50 hover:text-orange-600 transition-colors">Week</button>
+                <button data-period="30" class="px-3 py-1 text-[11px] rounded-lg bg-orange-50 text-orange-600 font-medium">Month</button>
+                <button data-period="365" class="px-3 py-1 text-[11px] rounded-lg bg-gray-100 text-gray-500 hover:bg-orange-50 hover:text-orange-600 transition-colors">Year</button>
+                <button data-period="all" class="px-3 py-1 text-[11px] rounded-lg bg-gray-100 text-gray-500 hover:bg-orange-50 hover:text-orange-600 transition-colors">All</button>
+            </div>
+            <canvas id="category-chart-canvas"></canvas>`,
+        load: () => loadCategoryChart(30)
     },
     {
         id: 'top-expenses',
@@ -85,7 +92,7 @@ const WIDGETS = [
         title: 'Income vs Expenses',
         icon: '📈',
         size: 'half',
-        renderHTML: () => `<canvas id="monthly-chart-canvas"></canvas>`,
+        renderHTML: () => `<div style="position:relative; min-height:280px;"><canvas id="monthly-chart-canvas"></canvas></div>`,
         load: loadMonthlyChart
     },
     {
@@ -216,14 +223,45 @@ async function loadSummary() {
     }
 }
 
-async function loadCategoryChart() {
-    const response = await fetchWithAuth(`${API_URL}/summary/by-category`);
+async function loadCategoryChart(days) {
+    // Build query params
+    let url = `${API_URL}/summary/by-category`;
+    if (days && days !== 'all') {
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+        url += `?start_date=${startDate.toISOString().split('T')[0]}`;
+    }
+
+    const response = await fetchWithAuth(url);
     if (!response) return;
     const result = await response.json();
     const canvas = document.getElementById('category-chart-canvas');
     if (!canvas) return;
 
+    // Destroy existing chart
+    if (currentCharts['category']) { currentCharts['category'].destroy(); delete currentCharts['category']; }
+
+    // Wire up period buttons (only once)
+    const btnContainer = document.getElementById('category-period-btns');
+    if (btnContainer && !btnContainer.dataset.wired) {
+        btnContainer.dataset.wired = 'true';
+        btnContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-period]');
+            if (!btn) return;
+            btnContainer.querySelectorAll('button').forEach(b => {
+                b.className = 'px-3 py-1 text-[11px] rounded-lg bg-gray-100 text-gray-500 hover:bg-orange-50 hover:text-orange-600 transition-colors';
+            });
+            btn.className = 'px-3 py-1 text-[11px] rounded-lg bg-orange-50 text-orange-600 font-medium';
+            const period = btn.dataset.period;
+            loadCategoryChart(period === 'all' ? 'all' : parseInt(period));
+        });
+    }
+
     if (result.success && result.data.length > 0) {
+        // Remove any no-data message
+        const existing = canvas.parentElement.querySelector('.no-data-msg');
+        if (existing) existing.remove();
+
         currentCharts['category'] = new Chart(canvas.getContext('2d'), {
             type: 'doughnut',
             data: {
@@ -235,11 +273,65 @@ async function loadCategoryChart() {
             },
             options: {
                 responsive: true, maintainAspectRatio: true,
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11, family: 'Inter' } } } }
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 10,
+                            font: { size: 11, family: 'Inter' },
+                            padding: 12,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            generateLabels: (chart) => {
+                                const data = chart.data;
+                                return data.labels.map((label, i) => {
+                                    const meta = chart.getDatasetMeta(0);
+                                    const hidden = meta.data[i] ? meta.data[i].hidden : false;
+                                    const total = data.datasets[0].data[i];
+                                    return {
+                                        text: `${label} ($${total.toFixed(0)})`,
+                                        fillStyle: hidden ? '#d1d5db' : data.datasets[0].backgroundColor[i],
+                                        strokeStyle: 'transparent',
+                                        hidden: false,
+                                        index: i,
+                                        fontColor: hidden ? '#9ca3af' : '#374151',
+                                        textDecoration: hidden ? 'line-through' : ''
+                                    };
+                                });
+                            }
+                        },
+                        onClick: (e, legendItem, legend) => {
+                            const index = legendItem.index;
+                            const chart = legend.chart;
+                            const meta = chart.getDatasetMeta(0);
+                            meta.data[index].hidden = !meta.data[index].hidden;
+                            chart.update();
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.label}: $${ctx.parsed.toFixed(2)}`
+                        }
+                    }
+                }
             }
         });
+
+        // Add hint if not already present
+        if (!canvas.parentElement.querySelector('.chart-hint')) {
+            const hint = document.createElement('p');
+            hint.className = 'text-[10px] text-gray-400 text-center mt-2 chart-hint';
+            hint.textContent = 'Click a legend label to hide/show categories';
+            canvas.parentElement.appendChild(hint);
+        }
     } else {
-        canvas.parentElement.innerHTML += '<p class="text-gray-400 text-sm text-center mt-8">No expense data yet</p>';
+        // Remove old "no data" message if present, add new one
+        const existing = canvas.parentElement.querySelector('.no-data-msg');
+        if (existing) existing.remove();
+        const p = document.createElement('p');
+        p.className = 'text-gray-400 text-sm text-center mt-8 no-data-msg';
+        p.textContent = 'No expense data for this period';
+        canvas.parentElement.appendChild(p);
     }
 }
 
@@ -306,14 +398,18 @@ async function loadMonthlyChart() {
             data: {
                 labels: last6.map(d => d.month),
                 datasets: [
-                    { label: 'Income', data: last6.map(d => d.income), backgroundColor: '#22c55e' },
-                    { label: 'Expenses', data: last6.map(d => d.expenses), backgroundColor: '#ef4444' }
+                    { label: 'Income', data: last6.map(d => d.income), backgroundColor: '#22c55e', borderRadius: 4 },
+                    { label: 'Expenses', data: last6.map(d => d.expenses), backgroundColor: '#ef4444', borderRadius: 4 }
                 ]
             },
             options: {
-                responsive: true, maintainAspectRatio: true,
-                scales: { y: { beginAtZero: true } },
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11, family: 'Inter' } } } }
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { font: { size: 10, family: 'Inter' } } },
+                    x: { grid: { display: false }, ticks: { font: { size: 10, family: 'Inter' } } }
+                },
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 11, family: 'Inter' } } } }
             }
         });
     } else {

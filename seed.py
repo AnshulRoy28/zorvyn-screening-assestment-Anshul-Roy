@@ -43,26 +43,42 @@ def seed_database_if_empty():
     admin_user = created_users[0]
     
     sample_transactions = [
-        {'days_ago': 1, 'item_name': 'Grocery Shopping', 'category': 'Food', 'amount': 85.50, 'type': 'expense'},
-        {'days_ago': 2, 'item_name': 'Uber Ride', 'category': 'Transport', 'amount': 15.00, 'type': 'expense'},
-        {'days_ago': 3, 'item_name': 'Monthly Salary', 'category': 'Income', 'amount': 5000.00, 'type': 'income'},
-        {'days_ago': 5, 'item_name': 'Netflix Subscription', 'category': 'Entertainment', 'amount': 15.99, 'type': 'expense'},
-        {'days_ago': 7, 'item_name': 'Electricity Bill', 'category': 'Bills', 'amount': 120.00, 'type': 'expense'},
-        {'days_ago': 8, 'item_name': 'Restaurant Dinner', 'category': 'Food', 'amount': 65.00, 'type': 'expense'},
-        {'days_ago': 10, 'item_name': 'Gas Station', 'category': 'Transport', 'amount': 45.00, 'type': 'expense'},
-        {'days_ago': 12, 'item_name': 'Online Shopping', 'category': 'Shopping', 'amount': 150.00, 'type': 'expense'},
-        {'days_ago': 15, 'item_name': 'Gym Membership', 'category': 'Health', 'amount': 50.00, 'type': 'expense'},
-        {'days_ago': 18, 'item_name': 'Coffee Shop', 'category': 'Food', 'amount': 12.50, 'type': 'expense'},
-        {'days_ago': 20, 'item_name': 'Freelance Project', 'category': 'Income', 'amount': 800.00, 'type': 'income'},
-        {'days_ago': 22, 'item_name': 'Movie Tickets', 'category': 'Entertainment', 'amount': 30.00, 'type': 'expense'},
-        {'days_ago': 25, 'item_name': 'Pharmacy', 'category': 'Health', 'amount': 25.00, 'type': 'expense'},
-        {'days_ago': 28, 'item_name': 'Internet Bill', 'category': 'Bills', 'amount': 60.00, 'type': 'expense'},
-        {'days_ago': 30, 'item_name': 'Supermarket', 'category': 'Food', 'amount': 95.00, 'type': 'expense'},
-        {'days_ago': 32, 'item_name': 'Bus Pass', 'category': 'Transport', 'amount': 80.00, 'type': 'expense'},
-        {'days_ago': 35, 'item_name': 'Clothing Store', 'category': 'Shopping', 'amount': 120.00, 'type': 'expense'},
-        {'days_ago': 40, 'item_name': 'Consulting Fee', 'category': 'Income', 'amount': 1200.00, 'type': 'income'},
-        {'days_ago': 42, 'item_name': 'Restaurant Lunch', 'category': 'Food', 'amount': 35.00, 'type': 'expense'},
-        {'days_ago': 45, 'item_name': 'Water Bill', 'category': 'Bills', 'amount': 40.00, 'type': 'expense'}
+        # ── Recurring: Netflix Subscription $50/mo (6 months) ──
+        {'days_ago': 5,   'item_name': 'Netflix Subscription', 'category': 'Entertainment', 'amount': 50.00, 'type': 'expense'},
+        {'days_ago': 35,  'item_name': 'Netflix Subscription', 'category': 'Entertainment', 'amount': 50.00, 'type': 'expense'},
+        {'days_ago': 65,  'item_name': 'Netflix Subscription', 'category': 'Entertainment', 'amount': 50.00, 'type': 'expense'},
+        {'days_ago': 95,  'item_name': 'Netflix Subscription', 'category': 'Entertainment', 'amount': 50.00, 'type': 'expense'},
+        {'days_ago': 125, 'item_name': 'Netflix Subscription', 'category': 'Entertainment', 'amount': 50.00, 'type': 'expense'},
+        {'days_ago': 155, 'item_name': 'Netflix Subscription', 'category': 'Entertainment', 'amount': 50.00, 'type': 'expense'},
+
+        # ── Recurring: Home Loan Payment $3000/mo (6 months) ──
+        {'days_ago': 1,   'item_name': 'Home Loan Payment', 'category': 'Bills', 'amount': 3000.00, 'type': 'expense'},
+        {'days_ago': 31,  'item_name': 'Home Loan Payment', 'category': 'Bills', 'amount': 3000.00, 'type': 'expense'},
+        {'days_ago': 61,  'item_name': 'Home Loan Payment', 'category': 'Bills', 'amount': 3000.00, 'type': 'expense'},
+        {'days_ago': 91,  'item_name': 'Home Loan Payment', 'category': 'Bills', 'amount': 3000.00, 'type': 'expense'},
+        {'days_ago': 121, 'item_name': 'Home Loan Payment', 'category': 'Bills', 'amount': 3000.00, 'type': 'expense'},
+        {'days_ago': 151, 'item_name': 'Home Loan Payment', 'category': 'Bills', 'amount': 3000.00, 'type': 'expense'},
+
+        # ── Variable transactions (won't trigger recurring detection) ──
+        {'days_ago': 1,  'item_name': 'Grocery Shopping',  'category': 'Food',          'amount': 85.50,   'type': 'expense'},
+        {'days_ago': 2,  'item_name': 'Uber Ride',         'category': 'Transport',     'amount': 15.00,   'type': 'expense'},
+        {'days_ago': 3,  'item_name': 'Monthly Salary',    'category': 'Income',        'amount': 5000.00, 'type': 'income'},
+        {'days_ago': 7,  'item_name': 'Electricity Bill',  'category': 'Bills',         'amount': 120.00,  'type': 'expense'},
+        {'days_ago': 8,  'item_name': 'Restaurant Dinner', 'category': 'Food',          'amount': 65.00,   'type': 'expense'},
+        {'days_ago': 10, 'item_name': 'Gas Station',       'category': 'Transport',     'amount': 45.00,   'type': 'expense'},
+        {'days_ago': 12, 'item_name': 'Online Shopping',   'category': 'Shopping',      'amount': 150.00,  'type': 'expense'},
+        {'days_ago': 15, 'item_name': 'Gym Membership',    'category': 'Health',        'amount': 50.00,   'type': 'expense'},
+        {'days_ago': 18, 'item_name': 'Coffee Shop',       'category': 'Food',          'amount': 12.50,   'type': 'expense'},
+        {'days_ago': 20, 'item_name': 'Freelance Project', 'category': 'Income',        'amount': 800.00,  'type': 'income'},
+        {'days_ago': 22, 'item_name': 'Movie Tickets',     'category': 'Entertainment', 'amount': 30.00,   'type': 'expense'},
+        {'days_ago': 25, 'item_name': 'Pharmacy',          'category': 'Health',        'amount': 25.00,   'type': 'expense'},
+        {'days_ago': 28, 'item_name': 'Internet Bill',     'category': 'Bills',         'amount': 60.00,   'type': 'expense'},
+        {'days_ago': 30, 'item_name': 'Supermarket',       'category': 'Food',          'amount': 95.00,   'type': 'expense'},
+        {'days_ago': 32, 'item_name': 'Bus Pass',          'category': 'Transport',     'amount': 80.00,   'type': 'expense'},
+        {'days_ago': 35, 'item_name': 'Clothing Store',    'category': 'Shopping',      'amount': 120.00,  'type': 'expense'},
+        {'days_ago': 40, 'item_name': 'Consulting Fee',    'category': 'Income',        'amount': 1200.00, 'type': 'income'},
+        {'days_ago': 42, 'item_name': 'Restaurant Lunch',  'category': 'Food',          'amount': 35.00,   'type': 'expense'},
+        {'days_ago': 45, 'item_name': 'Water Bill',        'category': 'Bills',         'amount': 40.00,   'type': 'expense'},
     ]
     
     for trans_data in sample_transactions:
