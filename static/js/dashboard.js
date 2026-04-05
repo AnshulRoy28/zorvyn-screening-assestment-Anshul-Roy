@@ -110,6 +110,19 @@ const WIDGETS = [
         size: 'half',
         renderHTML: () => `<div id="recurring-widget-list"></div>`,
         load: loadRecurringSummary
+    },
+    {
+        id: 'cashflow-sankey',
+        title: 'Cash Flow',
+        icon: '🌊',
+        size: 'full',
+        renderHTML: () => `
+            <div class="p-6 rounded-2xl bg-white border border-gray-200/80 shadow-sm mb-6">
+                <h3 class="text-sm font-medium text-gray-900 mb-4">🌊 Cash Flow</h3>
+                <div style="position:relative; min-height:320px;"><canvas id="sankey-canvas"></canvas></div>
+                <p class="text-[10px] text-gray-400 text-center mt-2">Income sources → Total Income → Expense categories & Savings</p>
+            </div>`,
+        load: loadCashflowSankey
     }
 ];
 
@@ -452,6 +465,73 @@ async function loadRecurringSummary() {
             </div>`;
     } else {
         container.innerHTML = '<p class="text-gray-400 text-sm text-center mt-8">No recurring expenses detected</p>';
+    }
+}
+
+async function loadCashflowSankey() {
+    const response = await fetchWithAuth(`${API_URL}/summary/cashflow`);
+    if (!response) return;
+    const result = await response.json();
+    const canvas = document.getElementById('sankey-canvas');
+    if (!canvas) return;
+
+    if (currentCharts['sankey']) { currentCharts['sankey'].destroy(); delete currentCharts['sankey']; }
+
+    if (result.success && result.data.flows.length > 0) {
+        const flows = result.data.flows;
+
+        // Color map for nodes
+        const nodeColors = {
+            'Income': '#22c55e',
+            'Total Income': '#16a34a',
+            'Savings': '#0ea5e9',
+            'Food': '#f97316',
+            'Transport': '#06b6d4',
+            'Shopping': '#ec4899',
+            'Bills': '#8b5cf6',
+            'Entertainment': '#eab308',
+            'Health': '#ef4444',
+            'Other': '#64748b'
+        };
+
+        const getColor = (key) => nodeColors[key] || '#94a3b8';
+
+        currentCharts['sankey'] = new Chart(canvas.getContext('2d'), {
+            type: 'sankey',
+            data: {
+                datasets: [{
+                    data: flows.map(f => ({ from: f.from, to: f.to, flow: f.value })),
+                    colorFrom: (c) => getColor(c.dataset.data[c.dataIndex].from),
+                    colorTo: (c) => getColor(c.dataset.data[c.dataIndex].to),
+                    colorMode: 'gradient',
+                    labels: Object.fromEntries(
+                        [...new Set(flows.flatMap(f => [f.from, f.to]))].map(n => [
+                            n, n === 'Total Income' ? `Total Income ($${result.data.total_income.toFixed(0)})` :
+                                n === 'Savings' ? `Savings ($${result.data.savings.toFixed(0)})` : n
+                        ])
+                    ),
+                    borderWidth: 0,
+                    nodeWidth: 16,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const item = ctx.dataset.data[ctx.dataIndex];
+                                return `${item.from} → ${item.to}: $${item.flow.toFixed(2)}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } else {
+        canvas.parentElement.innerHTML = '<p class="text-gray-400 text-sm text-center mt-12">No cash flow data yet — add some income and expense transactions</p>';
     }
 }
 

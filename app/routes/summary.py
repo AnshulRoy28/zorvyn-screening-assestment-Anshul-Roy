@@ -53,3 +53,47 @@ def get_recurring_calendar_route():
     data = get_recurring_calendar(request.user_id, year, month)
     return jsonify({'success': True, 'data': data}), 200
 
+@summary_bp.route('/cashflow', methods=['GET'])
+@require_auth
+def get_cashflow():
+    """Returns income sources, expense categories, and savings for Sankey diagram."""
+    from sqlalchemy import func
+    from app.models import Transaction
+
+    user_id = request.user_id
+
+    # Income by category
+    income_rows = Transaction.query.filter_by(user_id=user_id, type='income').with_entities(
+        Transaction.category, func.sum(Transaction.amount).label('total')
+    ).group_by(Transaction.category).all()
+
+    # Expense by category
+    expense_rows = Transaction.query.filter_by(user_id=user_id, type='expense').with_entities(
+        Transaction.category, func.sum(Transaction.amount).label('total')
+    ).group_by(Transaction.category).all()
+
+    total_income = sum(r.total for r in income_rows)
+    total_expenses = sum(r.total for r in expense_rows)
+    savings = max(total_income - total_expenses, 0)
+
+    # Build Sankey flow data
+    flows = []
+
+    # Income sources → Total Income
+    for r in income_rows:
+        flows.append({'from': r.category, 'to': 'Total Income', 'value': round(float(r.total), 2)})
+
+    # Total Income → Expense categories
+    for r in expense_rows:
+        flows.append({'from': 'Total Income', 'to': r.category, 'value': round(float(r.total), 2)})
+
+    # Total Income → Savings (if positive)
+    if savings > 0:
+        flows.append({'from': 'Total Income', 'to': 'Savings', 'value': round(float(savings), 2)})
+
+    return jsonify({'success': True, 'data': {
+        'flows': flows,
+        'total_income': round(float(total_income), 2),
+        'total_expenses': round(float(total_expenses), 2),
+        'savings': round(float(savings), 2)
+    }}), 200
