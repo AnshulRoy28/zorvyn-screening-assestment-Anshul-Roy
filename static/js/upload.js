@@ -57,21 +57,134 @@ function showMessage(message, isError = false) {
     }, 5000);
 }
 
-function showPreview(transactions) {
-    previewData = transactions;
+function makeEditable(cell, rowIndex, field) {
+    const currentValue = previewData[rowIndex][field];
+    const originalText = cell.textContent;
+
+    if (field === 'category') {
+        const categories = ['Food', 'Transport', 'Shopping', 'Bills', 'Entertainment', 'Health', 'Income', 'Other'];
+        const select = document.createElement('select');
+        select.className = 'w-full bg-white border border-orange-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500';
+        categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            option.selected = cat === currentValue;
+            select.appendChild(option);
+        });
+        cell.innerHTML = '';
+        cell.appendChild(select);
+        select.focus();
+        select.addEventListener('blur', () => saveEdit(cell, rowIndex, field, select.value, originalText));
+        select.addEventListener('change', () => saveEdit(cell, rowIndex, field, select.value, originalText));
+    } else if (field === 'type') {
+        const select = document.createElement('select');
+        select.className = 'w-full bg-white border border-orange-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500';
+        ['expense', 'income'].forEach(type => {
+            const option = document.createElement('option');
+            option.value = type;
+            option.textContent = type;
+            option.selected = type === currentValue;
+            select.appendChild(option);
+        });
+        cell.innerHTML = '';
+        cell.appendChild(select);
+        select.focus();
+        select.addEventListener('blur', () => saveEdit(cell, rowIndex, field, select.value, originalText));
+        select.addEventListener('change', () => saveEdit(cell, rowIndex, field, select.value, originalText));
+    } else if (field === 'amount') {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.step = '0.01';
+        input.value = currentValue || '';
+        input.className = 'w-full bg-white border border-orange-400 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-orange-500';
+        cell.innerHTML = '';
+        cell.appendChild(input);
+        input.focus();
+        input.select();
+        input.addEventListener('blur', () => saveEdit(cell, rowIndex, field, parseFloat(input.value) || 0, originalText));
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                saveEdit(cell, rowIndex, field, parseFloat(input.value) || 0, originalText);
+            }
+        });
+    } else if (field === 'date') {
+        const input = document.createElement('input');
+        input.type = 'date';
+        input.value = currentValue || '';
+        input.className = 'w-full bg-white border border-orange-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500';
+        cell.innerHTML = '';
+        cell.appendChild(input);
+        input.focus();
+        input.addEventListener('blur', () => saveEdit(cell, rowIndex, field, input.value, originalText));
+        input.addEventListener('change', () => saveEdit(cell, rowIndex, field, input.value, originalText));
+    } else {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = currentValue || '';
+        input.className = 'w-full bg-white border border-orange-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500';
+        cell.innerHTML = '';
+        cell.appendChild(input);
+        input.focus();
+        input.select();
+        input.addEventListener('blur', () => saveEdit(cell, rowIndex, field, input.value, originalText));
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                saveEdit(cell, rowIndex, field, input.value, originalText);
+            }
+        });
+    }
+}
+
+function saveEdit(cell, rowIndex, field, newValue, originalText) {
+    previewData[rowIndex][field] = newValue;
+    renderPreviewTable();
+}
+
+function deletePreviewRow(rowIndex) {
+    if (confirm('Delete this transaction?')) {
+        previewData.splice(rowIndex, 1);
+        renderPreviewTable();
+        if (previewData.length === 0) {
+            document.getElementById('preview-card').classList.add('hidden');
+        }
+    }
+}
+
+function renderPreviewTable() {
     const tbody = document.querySelector('#preview-table tbody');
-    tbody.innerHTML = transactions.map((t, i) => `
+    tbody.innerHTML = previewData.map((t, i) => `
         <tr class="hover:bg-gray-50/50 transition-colors">
-            <td class="px-6 py-3 text-gray-900 font-medium">${t.item_name || ''}</td>
-            <td class="px-6 py-3 text-right font-medium text-gray-900">${t.amount ? '$' + t.amount.toFixed(2) : 'N/A'}</td>
-            <td class="px-6 py-3"><span class="text-[10px] px-2 py-1 rounded-md bg-gray-100 text-gray-600">${t.category || 'Other'}</span></td>
-            <td class="px-6 py-3"><span class="text-[10px] px-2 py-1 rounded-md ${(t.type || 'expense') === 'income' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}">${t.type || 'expense'}</span></td>
-            <td class="px-6 py-3 text-gray-500">${t.date || 'Today'}</td>
+            <td class="px-6 py-3 text-gray-900 font-medium editable-cell" data-row="${i}" data-field="item_name">${t.item_name || ''}</td>
+            <td class="px-6 py-3 text-right font-medium text-gray-900 editable-cell" data-row="${i}" data-field="amount">${t.amount ? '$' + t.amount.toFixed(2) : 'N/A'}</td>
+            <td class="px-6 py-3 editable-cell" data-row="${i}" data-field="category"><span class="text-[10px] px-2 py-1 rounded-md bg-gray-100 text-gray-600">${t.category || 'Other'}</span></td>
+            <td class="px-6 py-3 editable-cell" data-row="${i}" data-field="type"><span class="text-[10px] px-2 py-1 rounded-md ${(t.type || 'expense') === 'income' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}">${t.type || 'expense'}</span></td>
+            <td class="px-6 py-3 text-gray-500 editable-cell" data-row="${i}" data-field="date">${t.date || 'Today'}</td>
+            <td class="px-6 py-3 text-center">
+                <button class="btn-small text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-colors" onclick="deletePreviewRow(${i})">
+                    <iconify-icon icon="solar:trash-bin-trash-linear" width="18"></iconify-icon>
+                </button>
+            </td>
         </tr>
     `).join('');
 
+    document.querySelectorAll('.editable-cell').forEach(cell => {
+        cell.addEventListener('click', () => {
+            const rowIndex = parseInt(cell.dataset.row);
+            const field = cell.dataset.field;
+            makeEditable(cell, rowIndex, field);
+        });
+    });
+}
+
+function showPreview(transactions) {
+    previewData = transactions;
+    renderPreviewTable();
     document.getElementById('preview-card').classList.remove('hidden');
 }
+
+// Make deletePreviewRow globally accessible
+window.deletePreviewRow = deletePreviewRow;
 
 document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {

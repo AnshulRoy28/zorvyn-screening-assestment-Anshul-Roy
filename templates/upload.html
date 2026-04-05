@@ -202,12 +202,18 @@
             <!-- Preview Table -->
             <div id="preview-card"
                 class="hidden mt-6 bg-white border border-gray-200/80 rounded-2xl shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h3 class="text-base font-medium text-gray-900">Preview Extracted Transactions</h3>
-                    <button id="confirm-btn"
-                        class="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-xl hover:bg-orange-600 transition-colors shadow-sm">
-                        Confirm & Save
-                    </button>
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-base font-medium text-gray-900">Preview Extracted Transactions</h3>
+                        <button id="confirm-btn"
+                            class="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-xl hover:bg-orange-600 transition-colors shadow-sm">
+                            Confirm & Save
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500">
+                        <iconify-icon icon="solar:info-circle-linear" width="14" class="inline"></iconify-icon>
+                        Click any cell to edit. Click the trash icon to delete a row.
+                    </p>
                 </div>
                 <div class="overflow-x-auto">
                     <table id="preview-table" class="w-full text-left text-sm whitespace-nowrap">
@@ -218,6 +224,7 @@
                                 <th class="px-6 py-3 font-medium">Category</th>
                                 <th class="px-6 py-3 font-medium">Type</th>
                                 <th class="px-6 py-3 font-medium">Date</th>
+                                <th class="px-6 py-3 font-medium text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100"></tbody>

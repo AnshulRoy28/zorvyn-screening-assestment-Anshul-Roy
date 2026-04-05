@@ -33,3 +33,20 @@ body {
 .customize-overlay.active {
     display: flex;
 }
+
+/* Editable cells */
+.editable-cell {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.editable-cell:hover {
+    background-color: rgba(249, 115, 22, 0.05);
+}
+
+/* Small button for delete actions */
+.btn-small {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
